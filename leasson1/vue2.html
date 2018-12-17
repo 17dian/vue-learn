@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+   <div id = "app">
+      <div>{{message}}</div>
+      <input v-modle = "message" >
+   </div>
+</body>
+<script type="text/javascript">
+
+
+
+class Dep{
+  constructor(){
+    this.subscribers = []
+  }
+  depend(){
+    if(Dep.target){
+      this.subscribers.push(Dep.target);
+    }
+  }
+  notify(){
+    this.subscribers.forEach(fn=>fn())
+  }
+}
+
+
+
+function autorun(fn){
+  Dep.target = fn;
+  console.log('')
+  fn();
+  Dep.target = null;
+}
+
+
+function convert(obj){
+  Object.keys(data).forEach((key)=>{
+    let dep = new Dep();
+    let inertValue = obj[key];
+    Object.defineProperty(obj,key,{
+      get(){
+        dep.depend()
+        console.log(dep)
+        return inertValue;
+      },
+      set(newValue){
+        inertValue = newValue;
+        dep.notify()
+      }
+    })
+  })
+}
+
+
+
+
+
+
+
+let data = {
+  a1 : 1,
+  a2 : 2
+}
+convert(data)
+
+autorun(()=>{b = data.a1*10;})
+
+
+data.a1 = 2;
+console.log(b)
+
+</script>
+</html>

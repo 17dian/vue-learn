@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+
+<style type="text/css">
+  
+input{
+  border:1px solid red;
+}
+
+</style>
+<body>
+   <div id = "app">
+      <div>{{message}}</div>
+      <input v-model = "message" >
+   </div>
+</body>
+<script type="text/javascript">
+
+
+
+class Dep{
+  constructor(){
+    this.subscribers = []
+  }
+  depend(){
+    if(Dep.target){
+      this.subscribers.push(Dep.target);
+    }
+  }
+  notify(){
+    this.subscribers.forEach(item=>item.update())
+  }
+}
+
+
+
+class Watcher{
+  constructor(node,type,vm,name){
+     Dep.target = this;
+     this.node = node;
+     this.name = name;
+     this.type = type;
+     this.vm = vm;
+     this.update();
+     Dep.target = null;
+  }
+  update(){
+     this.node[this.type] = this.vm[this.name];
+  }
+}
+
+
+function Observe(obj,vm){
+  Object.keys(obj).forEach((key)=>{
+    let dep = new Dep();
+    let inertValue = obj[key];
+    Object.defineProperty(vm,key,{
+      get(){
+        dep.depend()
+        console.log(dep)
+        return inertValue;
+      },
+      set(newValue){
+        inertValue = newValue;
+        dep.notify()
+      }
+    })
+  })
+}
+
+function compile(node,vm){
+  let frag = document.createDocumentFragment();
+  let child = node.firstElementChild;
+  while(child){
+    compileElement(child,vm)
+    child = child.nextElementSibling;
+  }
+  return frag;
+}  
+
+
+function compileElement(node,vm){
+  let attr = node.attributes;
+  for(let i = 0; i<attr.length ; i++){
+   let name = attr[i].nodeValue;
+   console.log(name)
+   switch (attr[i].nodeName) {
+     case "v-model":
+        node.addEventListener("input",(e)=>{
+          vm[name] = e.target.value;
+          console.log(e.target.value)
+        })
+       new Watcher(node,"value" ,vm ,name )
+       break;
+   }
+  }
+  let reg = /\{\{(.*)\}\}/;
+  if(reg.test(node.innerHTML)){
+    var name = RegExp.$1;
+    name = name.trim();
+    new Watcher(node,"innerHTML" ,vm ,name )
+  }
+}
+
+function Vue(options){
+   Observe(options.data,this) 
+   let dom = document.querySelector(options.el); 
+   let newDom = compile(dom,this);
+   dom.appendChild(newDom); 
+}
+
+
+let vm = new Vue({
+  el: '#app',
+  data: {
+    message: 'Hello Vue!'
+  }
+})
+
+
+
+
+</script>
+</html>

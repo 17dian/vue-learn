@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+   
+</body>
+<script type="text/javascript">
+  
+let data = {
+  a1 : 1,
+  a2 : 2
+}
+convert(data);
+
+
+b = data.a1*10;
+
+data.a1 = 2;
+
+
+function convert(obj){
+  let arr =  Object.keys(data);
+  arr.forEach((key)=>{
+     let inertValue = obj[key];
+     Object.defineProperty(obj,key,{
+      get(){
+        return inertValue;
+      },
+      set(newValue){
+        inertValue = newValue;
+        b = data.a1 * 10;
+      }
+     })
+  })
+}
+
+console.log(b)
+
+
+
+</script>
+</html>
